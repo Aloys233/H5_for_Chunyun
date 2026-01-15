@@ -1,0 +1,1140 @@
+:root {
+    --primary-red: #d32f2f;
+    --gold: #ffd700;
+    --bg-dark: #1a1a1a;
+    --text-white: #ffffff;
+    --accent-blue: #2196f3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* max-width: 500px; 移除全局限制，由各场景自行控制 */
+    /* margin: 0 auto; */
+    background-color: var(--bg-dark);
+    /* box-shadow: 0 0 50px rgba(0,0,0,0.5); 全屏模式下不需要投影 */
+}
+
+[v-cloak] {
+    display: none;
+}
+
+/* 场景通用样式 */
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 加载屏幕 */
+.loading-screen {
+    position: absolute; /* 改为absolute，相对于 #app 定位 */
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: #8e0000;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* 确保文字居中 */
+    pointer-events: auto; /* 确保能够接收点击 */
+}
+
+/* 确保内部容器也居中 */
+.loading-screen > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--gold);
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.start-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; /* 仅在按钮区域显示手型 */
+    z-index: 10000; /* 提升层级，确保不被loader遮挡 */
+    position: relative;
+}
+
+.start-btn {
+    background: linear-gradient(to bottom, #ffd700, #ffb300);
+    border: 4px solid #fff;
+    border-radius: 50px;
+    padding: 15px 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: pulse 1.5s infinite;
+    transition: transform 0.2s;
+    pointer-events: auto;
+}
+
+.start-btn:active {
+    transform: scale(0.95);
+}
+
+.start-icon {
+    font-size: 40px;
+    margin-bottom: 5px;
+}
+
+.start-text {
+    font-size: 20px;
+    color: #8e0000;
+    font-weight: 900;
+    text-shadow: none;
+}
+
+.start-hint {
+    margin-top: 15px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 主页面样式 */
+.home-scene {
+    background-color: #8b0000;
+    /* 更加丰富的背景：深红底色 + 顶部金色光晕 + 底部暗色渐变 + 细腻的纹理 */
+    background-image:
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.2) 0%, transparent 60%),
+        linear-gradient(to bottom, #a30000 0%, #720000 100%),
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 10px, rgba(0,0,0,0.03) 11px, transparent 12px);
+    padding: 20px;
+    overflow-y: auto !important;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5); /* 内阴影增加深邃感 */
+}
+
+/* 添加飘落装饰容器 */
+.home-scene::before {
+    content: '❄';
+    position: absolute;
+    top: -50px;
+    left: 5%;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.3);
+    animation: fall 15s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    /* 生成更多、更自然的雪花阴影，增加错落感 */
+    text-shadow:
+        5vw 15vh 0 rgba(255,255,255,0.2),
+        15vw 35vh 2px rgba(255,255,255,0.15),
+        25vw 5vh 0 rgba(255,255,255,0.25),
+        35vw 55vh 1px rgba(255,255,255,0.2),
+        45vw 25vh 0 rgba(255,255,255,0.1),
+        55vw 75vh 2px rgba(255,255,255,0.2),
+        65vw 10vh 0 rgba(255,255,255,0.3),
+        75vw 45vh 1px rgba(255,255,255,0.15),
+        85vw 65vh 0 rgba(255,255,255,0.2),
+        95vw 5vh 2px rgba(255,255,255,0.1);
+}
+
+@keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); }
+    100% { transform: translateY(110vh) rotate(360deg); }
+}
+
+/* 右下角装饰 - 改为更柔和的金色光晕 */
+.home-scene::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(20px);
+}
+
+.map-container {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+    padding-bottom: 60px;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    z-index: 1;
+}
+
+.title {
+    font-size: 34px;
+    /* 直接使用纯色增强对比度，不再使用背景裁切，提升清晰度 */
+    color: #ffd700;
+    margin-bottom: 50px;
+    /* 强阴影增加立体感和可读性 */
+    text-shadow:
+        0 2px 0 #b71c1c,
+        0 4px 0 #8b0000,
+        0 6px 15px rgba(0,0,0,0.6);
+    font-weight: 900;
+    letter-spacing: 4px;
+    position: relative;
+    padding: 0 10px;
+    z-index: 10;
+}
+
+/* 标题装饰线 - 优化为发光线条 */
+.title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 12px auto 0;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Zig-Zag / S形布局容器 */
+.map-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 50px; /* 增加间距 */
+    position: relative;
+    z-index: 2;
+    padding: 20px 0;
+    width: 100%;
+    max-width: 400px;
+}
+
+.stage-node {
+    width: 120px;
+    height: 120px;
+    /* 玻璃拟态 + 喜庆红金配色 */
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* 装饰角标 - 模拟中式窗棂的一角 */
+.stage-node::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* 节点定位 - ZigZag 布局微调 */
+.node-1 { align-self: flex-start; margin-left: 10%; }
+.node-2 { align-self: flex-end; margin-right: 10%; }
+.node-3 { align-self: flex-start; margin-left: 10%; }
+.node-4 { align-self: flex-end; margin-right: 10%; }
+
+.stage-node:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+}
+
+.stage-node:active {
+    transform: scale(0.95);
+}
+
+.stage-node.locked {
+    filter: grayscale(1) brightness(0.7);
+    opacity: 0.8;
+    pointer-events: none;
+    border-color: rgba(255,255,255,0.2);
+}
+
+.stage-node.completed {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+    border-color: var(--gold);
+    box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.4),
+        inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+/* 完成标记 */
+.stage-node.completed::before {
+    content: '🌸'; /* 小花装饰 */
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    font-size: 24px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.node-icon {
+    font-size: 48px;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    transition: transform 0.3s;
+}
+
+.stage-node:hover .node-icon {
+    transform: scale(1.1);
+}
+
+.node-name {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.3);
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-top: 5px;
+}
+
+.status-badge {
+    position: absolute;
+    top: -10px;
+    right: -15px;
+    background: linear-gradient(to right, #43a047, #66bb6a);
+    color: white;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    font-weight: bold;
+    border: 2px solid #fff;
+    transform: rotate(5deg);
+    z-index: 15;
+}
+
+.map-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* 场景子页面通用 */
+.sub-scene {
+    background: #000;
+}
+
+/* 场景一：购票反诈 */
+.stage1-swiper {
+    width: 100%;
+    height: 100%;
+    max-width: 500px; /* 场景一保持竖屏宽度限制 */
+    margin: 0 auto;
+}
+
+.quiz-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.quiz-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.6);
+    transform: scale(1.1);
+}
+
+.quiz-bg.clear-bg {
+    filter: none !important;
+    transform: scale(1);
+}
+
+.quiz-content {
+    position: relative;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    margin: 20px;
+    padding: 35px 25px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    width: 90%;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+}
+
+.quiz-content h3 {
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-size: 18px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.opt-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    text-align: left;
+    font-size: 16px;
+    transition: all 0.2s;
+    line-height: 1.4;
+}
+
+.opt-btn:active {
+    background: var(--gold);
+    color: black;
+    transform: scale(0.98);
+}
+
+.opt-btn.selected {
+    border-color: var(--gold);
+    background: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    font-weight: bold;
+}
+
+.confirm-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px;
+    background: var(--gold);
+    color: #8e0000;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* 动画效果 */
+.floating-up {
+    animation: floatUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes floatUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 音频控制 */
+.audio-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.audio-control {
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--gold);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.audio-wrapper:hover .volume-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.audio-control.playing {
+    animation: rotate 4s linear infinite;
+    box-shadow: 0 0 15px var(--gold);
+}
+
+.volume-panel {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    background: rgba(0,0,0,0.6);
+    padding: 10px 5px;
+    border-radius: 15px;
+    transform: translateY(-10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.volume-panel input[type=range] {
+    writing-mode: vertical-lr; /* 竖向滑块，兼容性较好 */
+    direction: rtl; /* 从下到上 */
+    width: 8px;
+    height: 80px;
+    appearance: slider-vertical; /* 针对 Webkit */
+    cursor: pointer;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+}
+
+.music-icon {
+    font-size: 20px;
+}
+
+/* 背包系统 */
+.backpack-trigger {
+    position: fixed;
+    bottom: 25px;
+    left: 20px;
+    z-index: 100;
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, var(--gold) 0%, #ffb300 100%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    border: 2px solid white;
+}
+
+.backpack-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.backpack-content {
+    background: #fff;
+    color: #333;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 25px;
+    padding: 25px;
+    position: relative;
+}
+
+.backpack-content h3 {
+    text-align: center;
+    color: #d32f2f;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.rhyme-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.rhyme-item {
+    margin-bottom: 18px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border-left: 5px solid #d32f2f;
+}
+
+.rhyme-item h4 {
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #555;
+}
+
+.rhyme-item p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    font-weight: 500;
+}
+
+.locked-text {
+    color: #bbb !important;
+    font-style: italic;
+}
+
+.close-bp {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 30px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* 全局弹窗 (Modal) */
+.global-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.modal-box {
+    background: #fff;
+    color: #333;
+    padding: 35px 25px;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    position: relative;
+    border: 4px solid transparent;
+    transition: all 0.3s;
+}
+
+/* 弹窗类型样式 */
+.modal-box.success {
+    border-color: #4caf50;
+}
+
+.modal-box.error {
+    border-color: #f44336;
+}
+
+.modal-box.info {
+    border-color: var(--gold);
+}
+
+.modal-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.modal-box.success .modal-icon { color: #4caf50; }
+.modal-box.error .modal-icon { color: #f44336; }
+
+.modal-box p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.modal-box button {
+    background: linear-gradient(to right, var(--primary-red), #b71c1c);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
+}
+
+/* 返回按钮 */
+.back-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+}
+
+/* 底部扩展内容 */
+.bottom-content {
+    width: 100%;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.summary-card {
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.btn-retry {
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+}
+
+/* 场景二：卡片多选 */
+.stage2-swiper {
+    width: 100%;
+    height: 100%;
+}
+
+/* 修复场景二背景跑偏的问题，强制定位到底部 */
+.stage2 .quiz-bg {
+    background-position: center bottom !important;
+}
+
+.car-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.car-card {
+    width: 320px; /*稍微加宽*/
+    max-width: 32%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 0;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.car-card img {
+    width: 100%;
+    height: 180px; /* 加高图片区域 */
+    object-fit: contain; /* 确保显示完整图片 */
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.car-card.selected {
+    border-color: var(--gold);
+    background: rgba(255,215,0,0.2);
+    transform: scale(1.05);
+}
+
+.car-card p {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+/* 场景三：找茬点击区 */
+.find-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-area {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+}
+
+.find-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+.hidden-spot {
+    position: absolute;
+    border: 2px dashed rgba(255,255,255,0);
+    border-radius: 50%;
+    z-index: 20;
+}
+.hidden-spot.found {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.3);
+    box-shadow: 0 0 10px #4caf50;
+}
+.hidden-spot.found::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #4caf50;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.bottom-panel {
+    position: relative;
+    width: 100%;
+    background: rgba(0,0,0,0.7);
+    padding: 20px;
+    text-align: center;
+    z-index: 30;
+}
+
+/* 场景四内容限宽 */
+.stage4 .quiz-slide {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* 场景四：乘车安全 */
+.stage4 {
+    display: flex;
+    justify-content: center;
+}
+
+.stage4 .quiz-slide {
+    width: 100%;
+    max-width: 500px; /* 场景4限制宽度 */
+    position: relative;
+    margin: 0 auto;
+}
+
+/* 场景四：接水动画 */
+.water-cup-container {
+    position: absolute;
+    top: 55%; /* 根据背景图饮水机位置调整 */
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 80px; /* 杯子稍微细一点 */
+    height: 120px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-top: none;
+    border-radius: 0 0 15px 15px;
+    background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1)); /* 玻璃质感 */
+    overflow: visible; /* 允许水流从上方进入 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,255,255,0.2);
+    z-index: 10;
+}
+
+/* 细水流动画 */
+.water-stream {
+    position: absolute;
+    top: -160px; /* 从饮水机出水口位置开始 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px; /* 细细的水流 */
+    height: 160px; /* 连接到杯底 */
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), #87CEFA, #00BFFF);
+    z-index: 5;
+    transform-origin: top;
+    animation: stream-start 0.2s ease-out forwards, stream-pulse 1s infinite linear;
+    pointer-events: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 0 5px rgba(0, 191, 255, 0.6);
+}
+
+@keyframes stream-start {
+    0% { transform: translateX(-50%) scaleY(0); opacity: 0; }
+    100% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+}
+
+@keyframes stream-pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* 水位 */
+.water-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 191, 255, 0.7); /* 半透明蓝色水 */
+    transition: height 0.1s linear; /* 平滑上升 */
+    border-radius: 0 0 13px 13px;
+    z-index: 6;
+    overflow: hidden;
+}
+
+/* 水面波纹装饰 (简单版) */
+.water-surface {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: rgba(255,255,255,0.4);
+    animation: ripple 1s infinite linear;
+}
+
+@keyframes ripple {
+    0% { transform: translateX(-10%); }
+    50% { transform: translateX(10%); }
+    100% { transform: translateX(-10%); }
+}
+
+/* 红色警戒线 */
+.cup-mark {
+    position: absolute;
+    bottom: 66%; /* 2/3处 */
+    width: 100%;
+    height: 0;
+    border-top: 2px dashed rgba(255, 50, 50, 0.8);
+    z-index: 20;
+}
+.cup-mark::after {
+    content: '安全水位';
+    position: absolute;
+    right: -45px;
+    top: -8px;
+    font-size: 10px;
+    color: rgba(255, 50, 50, 0.8);
+    background: rgba(255,255,255,0.8);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+/* 杯身高光 */
+.cup-highlight {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 5px;
+    height: 80%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 25;
+}
+
+.water-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+.water-btn:active {
+    background: #4caf50;
+    transform: scale(0.95);
+}
+
+/* Vue 过渡 */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.zoom-enter-active, .zoom-leave-active { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.zoom-enter-from, .zoom-leave-to { transform: scale(0.7); opacity: 0; }
+
+.page-slide-enter-active, .page-slide-leave-active { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.page-slide-enter-from { transform: translateX(100%); opacity: 0; }
+.page-slide-leave-to { transform: translateX(-100%); opacity: 0; }
+
+/* 分享定位模拟动画 */
+.share-anim-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.radar-wave {
+    width: 80px;
+    height: 80px;
+    background: rgba(33, 150, 243, 0.5);
+    border-radius: 50%;
+    position: relative;
+    animation: radar 1s infinite ease-out;
+}
+
+.radar-wave::before {
+    content: '📍';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+}
+
+@keyframes radar {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+.share-text {
+    margin-top: 20px;
+    color: #2196f3;
+    font-weight: bold;
+    font-size: 18px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
+
+/* 热区互动样式 */
+.hotspot-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    opacity: 0; /* 默认隐藏，配合动画显示 */
+    animation: fadeIn 0.8s 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.hotspot-title {
+    position: absolute;
+    top: 12%;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    padding: 0 20px;
+    z-index: 25;
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.hotspot-btn {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.hotspot-btn:active {
+    transform: scale(0.9) !important;
+    background: var(--gold);
+    color: #8e0000;
+    animation: none;
+}
+
+.hotspot-btn .icon {
+    font-size: 28px;
+    margin-bottom: 2px;
+}
+
+/* 统一热区样式，移除颜色暗示 */
+.hotspot-btn {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.hotspot-btn:hover {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: var(--gold);
+}

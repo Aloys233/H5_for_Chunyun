@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>安全回家过大年 - 春运风险防控指南</title>
+    <!-- 引入库 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 背景音乐控制 -->
+        <div class="audio-wrapper">
+            <div class="audio-control" @click="toggleBGM" :class="{ playing: bgmPlaying }">
+                <div class="music-icon">🎵</div>
+            </div>
+            <div class="volume-panel">
+                <input type="range" min="0" max="1" step="0.05" v-model="bgmVolume" @input="updateVolume" title="音量调节">
+            </div>
+        </div>
+
+        <!-- 资源加载页 -->
+        <transition name="fade">
+            <div v-if="loading" class="loading-screen">
+                <div v-if="loadProgress < 100">
+                    <div class="loader"></div>
+                    <p>正在载入春运安全地图... {{ loadProgress }}%</p>
+                </div>
+                <div v-else class="start-btn-container" @click="startExperience">
+                    <div class="start-btn">
+                        <div class="start-icon">🧨</div>
+                        <p class="start-text">开启回家之旅</p>
+                    </div>
+                    <p class="start-hint">点击按钮进入 🎵</p>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 主容器 -->
+        <main v-if="!loading" class="main-container">
+            <!-- 主页面：闯关地图 -->
+            <transition name="page-slide">
+                <section v-if="currentScene === 'home'" class="scene home-scene">
+                    <div class="map-container">
+                        <h1 class="title">春运安全闯关地图</h1>
+                        
+                        <!-- M形/S形 布局的板块 -->
+                        <div class="map-grid">
+                            <div v-for="(stage, index) in stages" :key="index"
+                                 class="stage-node"
+                                 :class="['node-' + (index+1), { locked: !stage.unlocked, completed: stage.completed }]"
+                                 @click="enterStage(index)">
+                                <div class="node-icon">{{ stage.icon }}</div>
+                                <span class="node-name">{{ stage.name }}</span>
+                                <div v-if="stage.completed" class="status-badge">已完成</div>
+                            </div>
+                            
+                            <!-- 连线 (SVG实现) -->
+                                <svg class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:rgba(255,215,0,0.2)" />
+                                            <stop offset="50%" style="stop-color:rgba(255,215,0,0.8)" />
+                                            <stop offset="100%" style="stop-color:rgba(255,215,0,0.2)" />
+                                        </linearGradient>
+                                        <!-- 发光滤镜 -->
+                                        <filter id="glow">
+                                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                            <feMerge>
+                                                <feMergeNode in="coloredBlur"/>
+                                                <feMergeNode in="SourceGraphic"/>
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+                                    
+                                    <!-- 1 -> 2 -->
+                                    <path d="M 25 15 C 25 30, 75 20, 75 35" stroke="url(#lineGradient)" stroke-width="1.5" fill="none" stroke-dasharray="4,2" filter="url(#glow)" />
+                                    <!-- 2 -> 3 -->
+                                    <path d="M 75 35 C 75 50, 25 40, 25 55" stroke="url(#lineGradient)" stroke-width="1.5" fill="none" stroke-dasharray="4,2" filter="url(#glow)" />
+                                    <!-- 3 -> 4 -->
+                                    <path d="M 25 55 C 25 70, 75 60, 75 75" stroke="url(#lineGradient)" stroke-width="1.5" fill="none" stroke-dasharray="4,2" filter="url(#glow)" />
+                                </svg>
+                        </div>
+
+                        <!-- 底部扩展内容 -->
+                        <div v-if="allCompleted" class="bottom-content" ref="bottomContent">
+                            <div class="summary-card">
+                                <h2>安全锦囊合集</h2>
+                                <p>您已成功解锁所有春运安全知识！</p>
+                                <button class="btn-retry" @click="resetGame">重新挑战</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </transition>
+
+            <!-- 场景一：购票反诈 -->
+            <transition name="page-slide">
+                <section v-if="currentScene === 'stage1'" class="scene sub-scene stage1">
+                    <div class="swiper-container stage1-swiper">
+                        <div class="swiper-wrapper">
+                            <div v-for="(q, i) in quiz1" :key="i" class="swiper-slide quiz-slide">
+                                <div class="quiz-bg" :style="{ backgroundImage: 'url(' + q.bg + ')' }"></div>
+                                <div class="quiz-content floating-up">
+                                    <h3>{{ q.question }}</h3>
+                                    <div class="options">
+                                        <!-- 单选题 -->
+                                        <template v-if="!q.isMulti">
+                                            <button v-for="(opt, oi) in q.options" :key="oi"
+                                                    class="opt-btn"
+                                                    :class="{ selected: q.selected === oi }"
+                                                    @click="selectOption(1, i, oi)">
+                                                {{ opt.text }}
+                                            </button>
+                                            <button class="confirm-btn" @click="confirmSingle(1, i)">确认选择</button>
+                                        </template>
+                                        <!-- 多选题 -->
+                                        <template v-else>
+                                            <button v-for="(opt, oi) in q.options" :key="oi"
+                                                    class="opt-btn"
+                                                    :class="{ selected: q.selected && q.selected.includes(oi) }"
+                                                    @click="toggleMultiOption(1, i, oi)">
+                                                {{ opt.text }}
+                                            </button>
+                                            <button class="confirm-btn" @click="confirmMulti(1, i)">确认选择</button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="back-home" @click="goHome">返回地图</button>
+                </section>
+            </transition>
+
+            <!-- 场景二：接驳防黑 -->
+            <transition name="page-slide">
+                <section v-if="currentScene === 'stage2'" class="scene sub-scene stage2">
+                    <div class="swiper-container stage2-swiper">
+                        <div class="swiper-wrapper">
+                            <!-- Q1: 选车 -->
+                            <div class="swiper-slide quiz-slide">
+                                <div class="quiz-bg" style="background-image:url('img/场景2_background1.jpg')"></div>
+                                <div class="quiz-content floating-up">
+                                    <h3>以下哪些是安全的接驳车辆？(多选)</h3>
+                                    <div class="options car-options">
+                                        <div class="car-card" :class="{selected: stage2Data.selectedCars.includes(0)}" @click="selectOption2(0)">
+                                            <img src="img/场景2_answerA.jpg" alt="网约车">
+                                            <p>A. 车顶有网约车平台标识、车内有计价器的白色轿车</p>
+                                        </div>
+                                        <div class="car-card" :class="{selected: stage2Data.selectedCars.includes(1)}" @click="selectOption2(1)">
+                                            <img src="img/场景2_answerB.jpg" alt="黑车">
+                                            <p>B. 无顶灯、无牌照、司机喊“20元到火车站”的面包车</p>
+                                        </div>
+                                        <div class="car-card" :class="{selected: stage2Data.selectedCars.includes(2)}" @click="selectOption2(2)">
+                                            <img src="img/场景2_answerC.jpg" alt="公交车">
+                                            <p>C. 车头挂着“火车站专线”标识的公交车</p>
+                                        </div>
+                                        <button class="confirm-btn" @click="confirmStage2">确认选择</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Q2: 乘车互动 -->
+                            <div class="swiper-slide quiz-slide">
+                                <div class="quiz-bg clear-bg" style="background-image:url('img/场景2_background1.jpg')"></div>
+                                
+                                <!-- 模拟分享定位动画层 -->
+                                <div v-if="stage2Data.sharing" class="share-anim-overlay">
+                                    <div class="radar-wave"></div>
+                                    <div class="share-text">正在发送实时定位...</div>
+                                </div>
+
+                                <!-- 绝对定位热区容器 -->
+                                <div class="hotspot-container">
+                                    <h3 class="hotspot-title">独自乘坐网约车，哪个操作能提升安全系数？</h3>
+                                    
+                                    <!-- 选项1: 分享定位 (手机位置) -->
+                                    <div class="hotspot-btn" style="top: 46%; left: 48%;" @click="handleShareAction('share')">
+                                        <div class="icon">📱</div>
+                                        <span>① 上车后将实时定位分享给家人</span>
+                                    </div>
+                                    
+                                    <!-- 选项2: 玩手机 (头部低头) -->
+                                    <div class="hotspot-btn" style="top: 20%; left: 45%;" @click="handleShareAction('phone')">
+                                        <div class="icon">🎮</div>
+                                        <span>② 上车后立刻玩手机，不与司机交流</span>
+                                    </div>
+
+                                    <!-- 选项3: 坐副驾 (副驾座位) -->
+                                    <div class="hotspot-btn" style="top: 80%; right: 72%;" @click="handleShareAction('seat')">
+                                        <div class="icon">💺</div>
+                                        <span>③ 随便坐副驾，方便指路</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="back-home" @click="goHome">返回地图</button>
+                </section>
+            </transition>
+
+            <!-- 场景三：候车防盗 -->
+<transition name="page-slide">
+<section v-if="currentScene === 'stage3'" class="scene sub-scene stage3">
+    <div class="find-container">
+        <!-- 加个容器限制图片区域，防止被底部遮挡 -->
+        <div class="game-area">
+            <!-- 场景三不需要模糊 -->
+            <img src="img/场景3_background.jpg" class="find-bg" style="filter: none !important;">
+            <div v-for="spot in spots3" :key="spot.id"
+                 class="hidden-spot"
+                 :class="{ found: spot.found }"
+                 :style="{ left: spot.x, top: spot.y, width: spot.w, height: spot.h }"
+                 @click="findSpot(spot)"></div>
+        </div>
+        <div class="bottom-panel">
+            <p>请找出图中3处安全隐藏隐患</p>
+            <button class="confirm-btn small" @click="checkSpotsAll">我找齐了</button>
+        </div>
+    </div>
+    <button class="back-home" @click="goHome">返回地图</button>
+</section>
+</transition>
+
+            <!-- 场景四：乘车安全 -->
+            <transition name="page-slide">
+                <section v-if="currentScene === 'stage4'" class="scene sub-scene stage4">
+                    <!-- Step 1: 存手机 -->
+                    <div v-if="waterData.step === 1" class="quiz-slide">
+                        <div class="quiz-bg clear-bg" style="background-image:url('img/场景4_background1.jpg');"></div>
+                         <div class="hotspot-container">
+                            <h3 class="hotspot-title">睡前存放手机，哪个做法最安全？</h3>
+                            
+                            <!-- 选项1: 桌板 (桌子上的书本附近) -->
+                            <div class="hotspot-btn" style="top: 65%; left: 55%;" @click="handlePhoneAction(1)">
+                                <div class="icon">📋</div>
+                                <span>① 放在卧铺床边的小桌板上</span>
+                            </div>
+
+                            <!-- 选项2: 贴身 (左下角人物口袋/手机) -->
+                            <div class="hotspot-btn" style="top: 78%; left: 15%;" @click="handlePhoneAction(2)">
+                                <div class="icon">🧥</div>
+                                <span>② 塞进贴身衣物口袋里</span>
+                            </div>
+
+                            <!-- 选项3: 给陌生人 (右上铺女生) -->
+                            <div class="hotspot-btn" style="top: 28%; right: 15%;" @click="handlePhoneAction(3)">
+                                <div class="icon">🤷‍♂️</div>
+                                <span>③ 交给对面铺的乘客帮忙看管</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: 接水 -->
+                    <div v-if="waterData.step === 2" class="quiz-slide">
+                        <div class="quiz-bg clear-bg" style="background-image:url('img/场景4_background2.jpg');"></div>
+                        <!-- 水杯容器 -->
+                        <div class="water-cup-container">
+                            <!-- 出水动画 (从上方注入) -->
+                            <div class="water-stream" v-if="waterData.isPouring"></div>
+                            
+                            <!-- 水位 -->
+                            <div class="water-fill" :style="{ height: waterData.height + '%' }">
+                                <div class="water-surface"></div> <!-- 水面波纹装饰 -->
+                            </div>
+                            
+                            <!-- 2/3处标线 -->
+                            <div class="cup-mark"></div>
+                            
+                            <!-- 杯身光泽/高光 (可选) -->
+                            <div class="cup-highlight"></div>
+                        </div>
+                        
+                        <!-- 按钮固定在底部 -->
+                        <div class="quiz-content" style="position: absolute; bottom: 20px; width: 90%; margin: 0; background: rgba(0,0,0,0.6);">
+                            <h3 style="margin-bottom: 10px; font-size: 16px;">接热水时，如何避免烫伤？<br>请长按按钮接水至合适位置(红色虚线处)。</h3>
+                            <button class="confirm-btn water-btn"
+                                    @mousedown="startWater" @mouseup="stopWater" @mouseleave="stopWater"
+                                    @touchstart="startWater" @touchend="stopWater">
+                                长按接水
+                            </button>
+                        </div>
+                    </div>
+                    <button class="back-home" @click="goHome">返回地图</button>
+                </section>
+            </transition>
+        </main>
+
+        <!-- 背包系统 -->
+        <div class="backpack-trigger" @click="showBackpack = true">
+            <div class="backpack-icon">🎒</div>
+        </div>
+        
+        <transition name="fade">
+            <div v-if="showBackpack" class="backpack-modal" @click.self="showBackpack = false">
+                <div class="backpack-content">
+                    <h3>我的安全口诀</h3>
+                    <div class="rhyme-list">
+                        <div v-for="(stage, index) in stages" :key="index" class="rhyme-item">
+                            <h4>{{ stage.name }}</h4>
+                            <p v-if="stage.completed">{{ stage.rhyme }}</p>
+                            <p v-else class="locked-text">尚未解锁</p>
+                        </div>
+                    </div>
+                    <button @click="showBackpack = false">关闭</button>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 全局弹窗 (文字弹窗/口诀弹窗) -->
+        <transition name="zoom">
+            <div v-if="modal.show" class="global-modal">
+                <div class="modal-box" :class="modal.type">
+                    <div class="modal-icon" v-if="modal.type === 'success'">✔</div>
+                    <div class="modal-icon" v-if="modal.type === 'error'">✖</div>
+                    <!-- info 类型通常用于口诀展示，不显示图标或显示灯泡 -->
+                    <p>{{ modal.text }}</p>
+                    <button v-if="modal.showBtn" @click="closeModal">确认</button>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 音频对象 -->
+        <audio ref="bgm" src="audio/BGM.mp3" loop></audio>
+        <audio ref="soundCorrect" src="audio/正确音效.MP3"></audio>
+        <audio ref="soundError" src="audio/错误音效.MP3"></audio>
+        <audio ref="soundWater" src="audio/放水声.MP3" loop></audio>
+        <audio ref="rhyme1" src="audio/场景1口诀.mp3"></audio>
+        <audio ref="rhyme2" src="audio/场景2口诀.mp3"></audio>
+        <audio ref="rhyme3" src="audio/场景3口诀.mp3"></audio>
+        <audio ref="rhyme4" src="audio/场景4口诀.mp3"></audio>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
